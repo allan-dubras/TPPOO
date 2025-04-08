@@ -1,44 +1,43 @@
+using System.Collections;
 using UnityEngine;
 
 namespace TP2_Heritage
 {
-    public class Skeleton : MonoBehaviour
+    public class Skeleton : Ennemie
     {
-        public int health = 80;
-        public int damage = 15;
-        public float speed = 3f;
-        public float detectionRange = 12f;
-        private Transform player;
-        
-        void Start() {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+        [SerializeField]
+        private bool SecondLife;
+
+        public Skeleton(int health, int damage, float speed, float detectionRange, Transform player, bool secondLife)
+        {
+            Health = health;
+            Damage = damage;
+            Speed = speed;
+            DetectionRange = detectionRange;
+            Player = player;
+            SecondLife = secondLife;
         }
-        
-        void Update() {
-            if (Vector3.Distance(transform.position, player.position) < detectionRange) {
-                Vector3 direction = (player.position - transform.position).normalized;
-                transform.position += direction * speed * Time.deltaTime;
+        public void relife()
+        {
+           gameObject.SetActive(true);
+            health = 80;
+        }
+        public override void Die()
+        {
+            base.Die();
+            if (SecondLife)
+            { 
+                StartCoroutine(life());
             }
         }
-        
-        public void TakeDamage(int amount) {
-            health -= amount;
-            if (health <= 0) {
-                Die();
-            }
+        IEnumerator life()
+        {
+            yield return new WaitForSeconds(3f);
+            relife();
         }
-        
-        private void Die() {
-            Destroy(gameObject);
-        }
-        
-        void OnCollisionEnter(Collision collision) {
-            if (collision.gameObject.CompareTag("Player")) {
-                PlayerCharacter player = collision.gameObject.GetComponent<PlayerCharacter>();
-                if (player != null) {
-                    player.TakeDamage(damage);
-                }
-            }
+        public void Update()
+        {
+            base.Update();
         }
     }
 }
